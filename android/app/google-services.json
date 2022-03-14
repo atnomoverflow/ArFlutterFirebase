@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "24516081923",
+    "firebase_url": "https://arreconstruction-cb284-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "arreconstruction-cb284",
+    "storage_bucket": "arreconstruction-cb284.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:24516081923:android:625e1a34fac094bac2d136",
+        "android_client_info": {
+          "package_name": "com.example.obj_detect"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "24516081923-4jptf4rfd77rct0i19ao5q724s3mr9vm.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyADxYuIUzdEpLPi0dgZrFIlaRZXZ3DczFM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "24516081923-4jptf4rfd77rct0i19ao5q724s3mr9vm.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

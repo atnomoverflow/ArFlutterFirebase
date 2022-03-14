@@ -1,27 +1,25 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:obj_detect/tflite/recognition.dart';
-import 'package:obj_detect/tflite/stats.dart';
-import 'package:obj_detect/ui/box_widget.dart';
-import 'package:obj_detect/ui/camera_view_singleton.dart';
+import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
 
 import 'camera_view.dart';
 
 /// [HomeView] stacks [CameraView] and [BoxWidget]s with bottom sheet for stats
 class HomeView extends StatefulWidget {
+  const HomeView({Key? key}) : super(key: key);
   @override
   _HomeViewState createState() => _HomeViewState();
 }
 
 class _HomeViewState extends State<HomeView> {
   /// Results to draw bounding boxes
-  List<Recognition>? results;
-
-  /// Realtime stats
-  Stats? stats;
+  ArCoreController? arCoreController;
 
   /// Scaffold Key
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -31,16 +29,12 @@ class _HomeViewState extends State<HomeView> {
       body: Stack(
         children: <Widget>[
           // Camera View
-          CameraView(resultsCallback, statsCallback),
-
-          // Bounding boxes
-          boundingBoxes(results),
-
+          const CameraView(),
           // Heading
           Align(
             alignment: Alignment.topLeft,
             child: Container(
-              padding: EdgeInsets.only(top: 20),
+              padding: const EdgeInsets.only(top: 20),
               child: Text(
                 'Object Detection Flutter',
                 textAlign: TextAlign.left,
@@ -52,41 +46,14 @@ class _HomeViewState extends State<HomeView> {
               ),
             ),
           ),
-
-        
         ],
       ),
     );
   }
 
-  /// Returns Stack of bounding boxes
-  Widget boundingBoxes(List<Recognition>? results) {
-    if (results == null) {
-      return Container();
-    }
-    return Stack(
-      children: results
-          .map((e) => BoxWidget(
-                result: e,
-              ))
-          .toList(),
-    );
+  @override
+  void dispose() {
+    // Dispose of the controller when the widget is disposed.
+    super.dispose();
   }
-
-  /// Callback to get inference results from [CameraView]
-  void resultsCallback(List<Recognition> results) {
-    setState(() {
-      this.results = results;
-    });
-  }
-
-  /// Callback to get inference stats from [CameraView]
-  void statsCallback(Stats stats) {
-    setState(() {
-      this.stats = stats;
-    });
-  }
-
- }
-
-/// Row for one Stats field
+}
