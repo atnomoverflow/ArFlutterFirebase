@@ -7,7 +7,6 @@ import 'package:obj_detect/database/model/request_reconstruction.dart';
 import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:obj_detect/database/database.dart';
-import 'package:obj_detect/tflite/classifier.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
 /// [CameraView] sends each frame for inference
@@ -22,31 +21,13 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   /// Results to draw bounding boxes
   bool _isLoading = false; // This is initially false where no loading state
   String? _progress = "Sending";
-  /// true when inference is ongoing
-  bool? predicting;
-
-  /// Instance of [Classifier]
-  Classifier? classifier;
-
-  /// Instance of [IsolateUtils]
-  IsolateUtils? isolateUtils;
+ 
 
   ArCoreController? arCoreController;
   @override
   void initState() {
     super.initState();
-     // Spawn a new isolate
-    isolateUtils = IsolateUtils();
-    await isolateUtils?.start();
-
-    // Camera initialization
-
-    // Create an instance of classifier to load model and labels
-    classifier = Classifier();
-    classifier?.loadLabels();
-    classifier?.loadModel();
-    // Initially predicting = false
-    predicting = false;
+  
   }
 
   @override
@@ -63,78 +44,9 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
           });
           // Take the Picture in a try / catch block. If anything goes wrong,
           // catch the error.
-          print(_isLoading);
-          _isLoading
-              ? showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return Center(
-                      child: CircularProgressIndicator(
-                        semanticsValue: _progress,
-                      ),
-                    );
-                  })
-              : null;
           try {
             String imagePath = await arCoreController?.snapshot() ?? "";
-
-            /// Callback to receive each frame [CameraImage] perform inference on it
-            onLatestImageAvailable(CameraImage cameraImage) async {
-              if (classifier?.interpreter != null &&
-                  classifier?.labels != null) {
-                // If previous inference has not completed then return
-                if (predicting!) {
-                  return;
-                }
-
-                setState(() {
-                  predicting = true;
-                });
-
-                var uiThreadTimeStart = DateTime.now().millisecondsSinceEpoch;
-                List<String> labels;
-
-                labels = classifier?.labels ?? [];
-
-                // Data to be passed to inference isolate
-                var isolateData = IsolateData(cameraImage, classifier?.interpreter?.address ?? 0, labels);
-
-                // We could have simply used the compute method as well however
-                // it would be as in-efficient as we need to continuously passing data
-                // to another isolate.
-
-                /// perform inference in separate isolate
-                Map<String, dynamic> inferenceResults =
-                    await inference(isolateData);
-
-                var uiThreadInferenceElapsedTime =
-                    DateTime.now().millisecondsSinceEpoch - uiThreadTimeStart;
-
-                // pass results to HomeView
-                widget.resultsCallback(inferenceResults["recognitions"]);
-
-                // pass stats to HomeView
-                widget.statsCallback((inferenceResults["stats"] as Stats)
-                  ..totalElapsedTime = uiThreadInferenceElapsedTime);
-
-                // set predicting to false to allow new frames
-                setState(() {
-                  predicting = false;
-                });
-              }
-            }
-
-            /// Runs inference in another isolate
-            Future<Map<String, dynamic>> inference(
-                IsolateData isolateData) async {
-              ReceivePort responsePort = ReceivePort();
-              isolateUtils?.sendPort
-                  .send(isolateData..responsePort = responsePort.sendPort);
-              var results = await responsePort.first;
-              return results;
-            }
-
-            final String fileName = "${Random().nextInt(10000)}.jpg";
+            final String fileName = "${Random().nextInt(10000)}.jpeg";
             final File file = File(imagePath);
             var ref = firebase_storage.FirebaseStorage.instance
                 .ref('uploads/$fileName');
@@ -149,7 +61,6 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
             request.id?.onValue.listen((DatabaseEvent event) async {
               var snapshot = event.snapshot;
               dynamic requestJson = snapshot.value;
-              //print(requestJson["image_uri"]);
               Request newRequest = Request.fromJson(requestJson);
               if (newRequest.modelUri != "") {
                 await addModel(newRequest.modelUri ?? "");
@@ -164,14 +75,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       ),
     );
   }
- /// Runs inference in another isolate
-  Future<Map<String, dynamic>> inference(IsolateData isolateData) async {
-    ReceivePort responsePort = ReceivePort();
-    isolateUtils?.sendPort
-        .send(isolateData..responsePort = responsePort.sendPort);
-    var results = await responsePort.first;
-    return results;
-  }
+ 
   void _onArCoreViewCreated(ArCoreController controller) {
     arCoreController = controller;
   }
@@ -179,7 +83,6 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   @override
   void dispose() {
     arCoreController?.dispose();
-
     super.dispose();
   }
 
