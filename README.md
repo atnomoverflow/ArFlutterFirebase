@@ -56,7 +56,7 @@ flutter pub get
 ```
 ---
 **NOTE**: 
-there is small modification on one of the packages(ARcore flutter plugin) that we are going to use that need to be manually changed you can find the change needed to be done to the package in this [PR]("https://github.com/giandifra/arcore_flutter_plugin/pull/141")
+there is a small modification on one of the packages(ARcore flutter plugin) that we are going to use that need to be manually changed you can find the change needed to be done to the package in this [PR]("https://github.com/giandifra/arcore_flutter_plugin/pull/141")
 do the same changes to the cached dependencies in your project you can find the path to the cashed dependencies in the `.flutter-plugins-dependencies` file .
 
 ---
