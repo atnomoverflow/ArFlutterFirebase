@@ -42,7 +42,7 @@ I am asuming that you have flutter and git installed
 **1. step:**
 clone the repository
 ```sh
-git clone https://github.com/atnomoverflow/ArFlutterFirebase
+git clone git@github.com:atnomoverflow/ArFlutterFirebase.git
 ```
 **2. step:**
 install dependencies 
