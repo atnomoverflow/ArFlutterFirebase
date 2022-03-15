@@ -22,12 +22,31 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   /// Results to draw bounding boxes
   bool _isLoading = false; // This is initially false where no loading state
   String? _progress = "Sending";
+  /// true when inference is ongoing
+  bool? predicting;
+
+  /// Instance of [Classifier]
   Classifier? classifier;
+
+  /// Instance of [IsolateUtils]
+  IsolateUtils? isolateUtils;
 
   ArCoreController? arCoreController;
   @override
   void initState() {
     super.initState();
+     // Spawn a new isolate
+    isolateUtils = IsolateUtils();
+    await isolateUtils?.start();
+
+    // Camera initialization
+
+    // Create an instance of classifier to load model and labels
+    classifier = Classifier();
+    classifier?.loadLabels();
+    classifier?.loadModel();
+    // Initially predicting = false
+    predicting = false;
   }
 
   @override
@@ -145,7 +164,14 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
       ),
     );
   }
-
+ /// Runs inference in another isolate
+  Future<Map<String, dynamic>> inference(IsolateData isolateData) async {
+    ReceivePort responsePort = ReceivePort();
+    isolateUtils?.sendPort
+        .send(isolateData..responsePort = responsePort.sendPort);
+    var results = await responsePort.first;
+    return results;
+  }
   void _onArCoreViewCreated(ArCoreController controller) {
     arCoreController = controller;
   }
