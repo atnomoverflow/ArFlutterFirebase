@@ -36,7 +36,7 @@ class _HomeViewState extends State<HomeView> {
             child: Container(
               padding: const EdgeInsets.only(top: 20),
               child: Text(
-                'Object Detection Flutter',
+                'ArCore Firebase Flutter',
                 textAlign: TextAlign.left,
                 style: TextStyle(
                   fontSize: 28,

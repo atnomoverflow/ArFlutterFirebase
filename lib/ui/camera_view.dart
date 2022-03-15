@@ -7,6 +7,7 @@ import 'package:obj_detect/database/model/request_reconstruction.dart';
 import 'package:arcore_flutter_plugin/arcore_flutter_plugin.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:obj_detect/database/database.dart';
+import 'package:obj_detect/tflite/classifier.dart';
 import 'package:vector_math/vector_math_64.dart' as vector;
 
 /// [CameraView] sends each frame for inference
@@ -21,6 +22,8 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
   /// Results to draw bounding boxes
   bool _isLoading = false; // This is initially false where no loading state
   String? _progress = "Sending";
+  Classifier? classifier;
+
   ArCoreController? arCoreController;
   @override
   void initState() {
@@ -75,8 +78,7 @@ class _CameraViewState extends State<CameraView> with WidgetsBindingObserver {
                 labels = classifier?.labels ?? [];
 
                 // Data to be passed to inference isolate
-                var isolateData = IsolateData(
-                    cameraImage, classifier?.interpreter?.address ?? 0, labels);
+                var isolateData = IsolateData(cameraImage, classifier?.interpreter?.address ?? 0, labels);
 
                 // We could have simply used the compute method as well however
                 // it would be as in-efficient as we need to continuously passing data
